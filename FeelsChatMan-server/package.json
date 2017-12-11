@@ -1,0 +1,26 @@
+{
+  "name": "chat-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.16.2",
+    "mongoose": "^4.13.5",
+    "mongoose-auto-increment": "^5.0.1",
+    "mongoose-paginate": "^5.0.3",
+    "mongoose-unique-validator": "^1.0.6",
+    "require-tree": "^1.1.1",
+    "socket.io": "^2.0.4"
+  }
+}

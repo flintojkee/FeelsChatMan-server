@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
+var mongoosePaginate = require('mongoose-paginate');
 
 var MessageSchema = new mongoose.Schema({
     text: {
@@ -7,14 +8,14 @@ var MessageSchema = new mongoose.Schema({
         required: true
     },
     date: {
-        type: Date
+        type: String
     },
     sender: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'User'
     },
     channel: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'Channel'
     },
     pinned: {
@@ -32,5 +33,6 @@ var MessageSchema = new mongoose.Schema({
     }
 })
 
+MessageSchema.plugin(mongoosePaginate);
 MessageSchema.plugin(autoIncrement.plugin, 'Message');
 mongoose.model('Message', MessageSchema);

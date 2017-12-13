@@ -16,11 +16,11 @@ var ChannelSchema = new mongoose.Schema({
 		required: false
 	},
 	admin: {
-		type: mongoose.Schema.Types.ObjectId,
+		type: String,
 		ref: 'User'
 	},
-	partisipants: [{
-		type: mongoose.Schema.Types.ObjectId,
+	participants: [{
+		type: String,
 		ref: 'User'
 	}] 
 }, {

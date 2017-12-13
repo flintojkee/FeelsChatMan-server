@@ -15,7 +15,11 @@ var UserSchema = new mongoose.Schema({
     colour: {
         type: String,
         enum: ['Blue', 'Coral', 'DodgerBlue', 'SpringGreen', 'YellowGreen', 'Green', 'OrangeRed', 'Red', 'GoldenRod', 'HotPink', 'CadetBlue', 'SeaGreen', 'Chocolate', 'BlueViolet', 'Firebrick']
-    }
+    },
+    channels: [{
+        type: String,
+        ref: 'Channel'
+    }]
 }, {
     toJSON: {
         virtuals: true
@@ -27,7 +31,7 @@ var UserSchema = new mongoose.Schema({
 });
 
 
-UserSchema.virtual('username').get(function(){
+UserSchema.virtual('username').get(function() {
     return this._id;
 });
 

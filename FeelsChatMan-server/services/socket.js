@@ -45,7 +45,7 @@ module.exports = function(io) {
         socket.on('user joined channel', (data) => {
             cache.addParticipantToChannel(data.channel.name, data.user);
             cache.addOnlineUserToChannel(data.channel.name, data.user);
-            io.sockets.emit('user joined channel', data);
+            socket.broadcast.emit('user joined channel', data);
         })
 
         socket.on('request cache', (channel) => {

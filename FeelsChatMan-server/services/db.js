@@ -190,13 +190,28 @@ module.exports.loadChannels = function() {
     })
 }
 
+module.exports.getNumOfAllChannelMessages = function(channelName) {
+    return new Promise((resolve, reject) => {
+        Message.find({
+            channel: channelName
+        }, (err, messages) => {
+            if (err) reject(err)
+            else {
+                resolve(messages.length)
+            }
+        })
+    })
+}
+
 module.exports.loadMessagesForChannel = function(channelName, numOfMsg, numToSkip) {
     return new Promise((resolve, reject) => {
         var query = {
             channel: channelName
         };
         var options = {
-            sort: { _id: -1 },
+            sort: {
+                _id: -1
+            },
             offset: numToSkip,
             limit: numOfMsg
         };

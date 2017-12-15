@@ -49,7 +49,9 @@ var removeOnlineUser = function(username) {
 }
 
 var addChannelToOnlineUser = function(username, channel) {
-    cache.online_users[username].channels.push(channel);
+    if (cache.online_users[username]) {
+        cache.online_users[username].channels.push(channel);
+    }
 }
 
 var addOnlineUserToChannel = function(channel, user) {

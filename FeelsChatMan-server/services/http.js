@@ -44,6 +44,7 @@ module.exports = function(app) {
         db.createChannel(req.body.c_name, req.body.c_password, req.body.c_desc, req.body.c_admin)
             .then(result => {
                 cache.writeChannelToCache(result.channel);
+                cache.addChannelToOnlineUser(result.user.username, result.channel);
                 // cache.addParticipantToChannel(result.channel.name, result.user);
                 res.send(result)
             })

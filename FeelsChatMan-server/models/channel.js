@@ -31,6 +31,8 @@ var ChannelSchema = new mongoose.Schema({
     toObject: {
         virtuals: true
     }
+}, {
+    usePushEach: true
 })
 
 ChannelSchema.virtual('name').get(function(){

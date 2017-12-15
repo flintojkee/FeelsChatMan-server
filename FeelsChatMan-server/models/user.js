@@ -28,8 +28,9 @@ var UserSchema = new mongoose.Schema({
     toObject: {
         virtuals: true
     }
+}, {
+    usePushEach: true
 });
-
 
 UserSchema.virtual('username').get(function() {
     return this._id;

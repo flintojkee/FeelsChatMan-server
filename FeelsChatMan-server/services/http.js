@@ -43,6 +43,8 @@ module.exports = function(app) {
         console.log("Request: " + req.body.c_name + req.body.c_password + req.body.c_desc + req.body.c_admin);
         db.createChannel(req.body.c_name, req.body.c_password, req.body.c_desc, req.body.c_admin)
             .then(result => {
+                cache.writeChannelToCache(result.channel);
+                // cache.addParticipantToChannel(result.channel.name, result.user);
                 res.send(result)
             })
             .catch(err => {
@@ -52,7 +54,7 @@ module.exports = function(app) {
 
     app.post('/subForChannel', (req, res) => {
         console.log("Join request: " + req.body.j_username + req.body.j_name);
-        console.log(cache.cache.online_users);
+        // console.log(cache.cache.online_users);
         if (!cache.checkIfOnline(req.body.j_username)) {
             res.send({
                 success: false,
@@ -62,6 +64,8 @@ module.exports = function(app) {
         }
         db.subForChannel(req.body.j_username, req.body.j_name, req.body.j_password)
             .then(result => {
+                cache.addChannelToOnlineUser(result.user.username, result.channel);
+                cache.addOnlineUserToChannel(result.channel.name, result.user);
                 res.send(result);
             })
             .catch(err => {

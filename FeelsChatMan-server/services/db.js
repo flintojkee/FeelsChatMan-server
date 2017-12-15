@@ -112,6 +112,7 @@ module.exports.createChannel = function(c_name, c_password, c_desc, c_admin) {
                                 resolve({
                                     success: true,
                                     channel: data.toJSON(),
+                                    user: updatedUser.toJSON(),
                                     msg: "Channel created"
                                 })
                             }
@@ -157,7 +158,8 @@ module.exports.subForChannel = function(j_username, j_channel, j_password) {
                                                 resolve({
                                                     success: true,
                                                     msg: "Successfully joined to " + updatedChannel.name,
-                                                    channel: updatedChannel
+                                                    channel: updatedChannel,
+                                                    user: updatedUser,
                                                 })
                                             }
                                         })
@@ -194,6 +196,7 @@ module.exports.loadMessagesForChannel = function(channelName, numOfMsg, numToSki
             channel: channelName
         };
         var options = {
+            sort: { _id: -1 },
             offset: numToSkip,
             limit: numOfMsg
         };
@@ -212,7 +215,8 @@ module.exports.saveMessage = function(msg) {
             msg: msg.msg,
             date: msg.date,
             username: msg.username,
-            channel: msg.channel
+            channel: msg.channel,
+            colour: msg.colour
         })
         newMessage.save((err, data) => {
             if (err) {

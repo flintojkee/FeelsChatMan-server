@@ -14,6 +14,9 @@ var MessageSchema = new mongoose.Schema({
         type: String,
         ref: 'User'
     },
+    colour: {
+        type: String
+    },
     channel: {
         type: String,
         ref: 'Channel'
@@ -31,6 +34,8 @@ var MessageSchema = new mongoose.Schema({
     toObject: {
         virtuals: true
     }
+}, {
+    usePushEach: true
 })
 
 MessageSchema.plugin(mongoosePaginate);

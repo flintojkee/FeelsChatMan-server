@@ -25,23 +25,24 @@ var writeMessageToCache = function(msg) {
 }
 
 var addOnlineUser = function(user) {
-    console.log(JSON.stringify(cache, null, 2))
+    // console.log(JSON.stringify(cache, null, 2))
     cache.online_users[user.username] = {
         colour: user.colour,
         channels: user.channels
     }
-    console.log(JSON.stringify(cache, null, 2))
+    //console.log(JSON.stringify(cache, null, 2))
     user.channels.forEach((channel) => {
         addOnlineUserToChannel(channel.name, user)
     })
     console.log("CACHED USER: " + user.username);
-    console.log(cache.online_users);
+    // console.log(JSON.stringify(cache, null, 2))
+    // console.log(cache.online_users);
 };
 
 var removeOnlineUser = function(username) {
     if (cache.online_users[username]) {
         cache.online_users[username].channels.forEach((channel) => {
-            removeOnlineUserFromChannel(channel.name, username)
+            removeOnlineUserFromChannel(channel._id, username)
         })
         delete cache.online_users[username];
     }
@@ -52,10 +53,16 @@ var addChannelToOnlineUser = function(username, channel) {
 }
 
 var addOnlineUserToChannel = function(channel, user) {
-    cache[channel].online_users[user.username] = user.colour
+    cache[channel].online_users[user.username] = user.colour;
+}
+
+var addParticipantToChannel = function(channel, user) {
+    cache[channel].participants.push(user.username);
 }
 
 var removeOnlineUserFromChannel = function(channel, username) {
+    // console.log(JSON.stringify(cache, null, 2))
+    // console.log("WUT " + channel + " - " + cache[channel])
     delete cache[channel].online_users[username];
 }
 
@@ -101,3 +108,4 @@ module.exports.addChannelToOnlineUser = addChannelToOnlineUser;
 module.exports.addOnlineUserToChannel = addOnlineUserToChannel;
 module.exports.removeOnlineUserFromChannel = removeOnlineUserFromChannel;
 module.exports.getOnlineUsers = getOnlineUsers;
+module.exports.addParticipantToChannel = addParticipantToChannel;

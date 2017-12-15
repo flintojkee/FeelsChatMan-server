@@ -33,7 +33,6 @@ module.exports = function(io) {
         socket.on('new channel', (channel) => {
             console.log('new channel created');
             socket.broadcast.emit('new channel created', channel);
-            cache.writeChannelToCache(channel)
         })
 
         socket.on('logged', (user) => {
@@ -41,6 +40,12 @@ module.exports = function(io) {
             socket.username = user.username;
             socket.channel = user.channel;
             socket.broadcast.emit('user logged', user)
+        })
+
+        socket.on('user joined channel', (data) => {
+            cache.addParticipantToChannel(data.channel.name, data.user);
+            cache.addOnlineUserToChannel(data.channel.name, data.user);
+            io.sockets.emit('user joined channel', data);
         })
 
         socket.on('request cache', (channel) => {
@@ -54,9 +59,13 @@ module.exports = function(io) {
         })
 
         socket.on('request more msgs', (data) => {
+            console.log("MORE MSG SERVER")
             db.loadMessagesForChannel(data.channel, data.numOfMsg, data.numToSkip)
                 .then(result => {
-                    socket.emit(result)
+                    console.log("MORE MSG RES")
+                    console.log(result)
+                    socket.emit('test');
+                    socket.emit('request more msgs', result.docs);
                 })
         })
     })

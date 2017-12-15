@@ -20,11 +20,15 @@ module.exports.registerUser = function(r_username, r_password, r_colour) {
     return new Promise((resolve, reject) => {
         newUser.save((err, data) => {
             if (err) {
-                if (err.errmsg.includes("duplicate key error"))
-                    reject({
-                        success: false,
-                        msg: "This username is already taken"
-                    })
+                if (err.errmsg) {
+                    if (err.errmsg.includes("duplicate key error"))
+                        reject({
+                            success: false,
+                            msg: "This username is already taken"
+                        })
+                } else {
+                    reject(err)
+                }
             } else {
                 console.log("After save" + data.username);
                 resolve({
@@ -42,7 +46,7 @@ module.exports.loginUser = function(l_username, l_password) {
     return new Promise((resolve, reject) => {
         User.findOne({
             _id: l_username
-        }, (err, user) => {
+        }).populate('channels').exec((err, user) => {
             if (err) reject(err)
             if (user) {
                 //console.log(user.username)
@@ -78,7 +82,8 @@ module.exports.createChannel = function(c_name, c_password, c_desc, c_admin) {
         var newChannel = new Channel({
             _id: c_name,
             desc: c_desc,
-            admin: c_admin
+            admin: c_admin,
+            participants: [c_admin]
         })
         if (c_password.trim()) {
             newChannel.password = c_password
@@ -95,39 +100,77 @@ module.exports.createChannel = function(c_name, c_password, c_desc, c_admin) {
                 }
             } else {
                 console.log("New channel: " + data.name);
-                resolve({
-                    success: true,
-                    channel: data.toJSON(),
-                    msg: "Channel created"
+                User.findOne({
+                    _id: c_admin
+                }, (err, user) => {
+                    if (err) reject(err)
+                    else {
+                        user.channels.push(data.name);
+                        user.save((err, updatedUser) => {
+                            if (err) reject(err)
+                            else {
+                                resolve({
+                                    success: true,
+                                    channel: data.toJSON(),
+                                    msg: "Channel created"
+                                })
+                            }
+                        })
+                    }
                 })
             }
         })
     })
 }
 
-module.exports.subForChannel = function(s_username, s_channel, s_password) {
+module.exports.subForChannel = function(j_username, j_channel, j_password) {
     return new Promise((resolve, reject) => {
         Channel.findOne({
-            _id: s_channel
+            _id: j_channel
         }, (err, channel) => {
             if (err) reject(err)
             else {
-                if (channel.password === s_password) {
-                    channel.participants.push(s_username)
-                    channel.save((err, updatedChannel) => {
-                        if (err) reject(err)
-                        else {
-                            resolve({
-                                success: true,
-                                msg: "Successfully joined to " + updatedChannel.name
-                            })
-                        }
-                    })
-                } else {
+                if (channel == null) {
                     reject({
                         success: false,
-                        msg: "Incorrect password"
+                        msg: "No such channel"
                     })
+                } else {
+                    if (channel.password === j_password) {
+                        if (channel.participants.indexOf(j_username) !== -1 || channel.admin === j_username) {
+                            reject({
+                                success: false,
+                                msg: "Already joined this channel"
+                            })
+                        } else {
+                            channel.participants.push(j_username)
+                            channel.save((err, updatedChannel) => {
+                                if (err) reject(err)
+                                else {
+                                    User.findOne({
+                                        _id: j_username
+                                    }, (err, user) => {
+                                        user.channels.push(updatedChannel.name)
+                                        user.save((err, updatedUser) => {
+                                            if (err) reject(err)
+                                            else {
+                                                resolve({
+                                                    success: true,
+                                                    msg: "Successfully joined to " + updatedChannel.name,
+                                                    channel: updatedChannel
+                                                })
+                                            }
+                                        })
+                                    })
+                                }
+                            })
+                        }
+                    } else {
+                        reject({
+                            success: false,
+                            msg: "Incorrect password"
+                        })
+                    }
                 }
             }
         })
@@ -166,9 +209,9 @@ module.exports.loadMessagesForChannel = function(channelName, numOfMsg, numToSki
 module.exports.saveMessage = function(msg) {
     return new Promise((resolve, reject) => {
         var newMessage = new Message({
-            text: msg.msg,
+            msg: msg.msg,
             date: msg.date,
-            sender: msg.username,
+            username: msg.username,
             channel: msg.channel
         })
         newMessage.save((err, data) => {

@@ -1,7 +1,7 @@
 var db = require('./db.js');
 
 var cache = {
-    online_users: []
+    online_users: {},
 };
 
 var writeChannelToCache = function(channel) {
@@ -10,31 +10,68 @@ var writeChannelToCache = function(channel) {
         password: channel.password,
         admin: channel.admin,
         participants: channel.participants,
-        online_users: [],
+        online_users: {},
         last_messages: []
     }
 }
 
 var writeMessageToCache = function(msg) {
-    cache[msg.channel].last_messages.push(msg);
+    var cachedMsg = cache[msg.channel].last_messages;
+    if (cachedMsg.length >= 20) {
+        cachedMsg.shift();
+    }
+    cachedMsg.push(msg);
     console.log("MSG CACHED")
 }
 
-var addOnlineUser = function(username) {
-    cache.online_users.push(username);
-    console.log("CACHED USER: " + username);
+var addOnlineUser = function(user) {
+    console.log(JSON.stringify(cache, null, 2))
+    cache.online_users[user.username] = {
+        colour: user.colour,
+        channels: user.channels
+    }
+    console.log(JSON.stringify(cache, null, 2))
+    user.channels.forEach((channel) => {
+        addOnlineUserToChannel(channel.name, user)
+    })
+    console.log("CACHED USER: " + user.username);
+    console.log(cache.online_users);
 };
 
 var removeOnlineUser = function(username) {
-    index = cache.online_users.indexOf(username);
-    if (index !== -1) {
-        cache.online_users.splice(index, 1);
+    if (cache.online_users[username]) {
+        cache.online_users[username].channels.forEach((channel) => {
+            removeOnlineUserFromChannel(channel.name, username)
+        })
+        delete cache.online_users[username];
     }
 }
 
+var addChannelToOnlineUser = function(username, channel) {
+    cache.online_users[username].channels.push(channel);
+}
+
+var addOnlineUserToChannel = function(channel, user) {
+    cache[channel].online_users[user.username] = user.colour
+}
+
+var removeOnlineUserFromChannel = function(channel, username) {
+    delete cache[channel].online_users[username];
+}
+
 var checkIfOnline = function(username) {
-    return cache.online_users.includes(username);
+    // if(cache.online_users[username])
+    return cache.online_users[username];
 };
+
+var getLastMsgs = function(channel) {
+    // console.log(JSON.stringify(cache, null, 2))
+    return cache[channel].last_messages;
+}
+
+var getOnlineUsers = function(channel) {
+    return cache[channel].online_users;
+}
 
 module.exports = function() {
     db.loadChannels()
@@ -59,3 +96,8 @@ module.exports.writeChannelToCache = writeChannelToCache;
 module.exports.addOnlineUser = addOnlineUser;
 module.exports.removeOnlineUser = removeOnlineUser;
 module.exports.checkIfOnline = checkIfOnline;
+module.exports.getLastMsgs = getLastMsgs;
+module.exports.addChannelToOnlineUser = addChannelToOnlineUser;
+module.exports.addOnlineUserToChannel = addOnlineUserToChannel;
+module.exports.removeOnlineUserFromChannel = removeOnlineUserFromChannel;
+module.exports.getOnlineUsers = getOnlineUsers;

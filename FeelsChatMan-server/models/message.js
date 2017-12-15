@@ -3,14 +3,14 @@ var autoIncrement = require('mongoose-auto-increment');
 var mongoosePaginate = require('mongoose-paginate');
 
 var MessageSchema = new mongoose.Schema({
-    text: {
+    msg: {
         type: String,
         required: true
     },
     date: {
         type: String
     },
-    sender: {
+    username: {
         type: String,
         ref: 'User'
     },

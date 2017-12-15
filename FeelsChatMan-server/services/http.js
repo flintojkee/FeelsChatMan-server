@@ -16,7 +16,7 @@ module.exports = function(app) {
         console.log("Login request params: " + req.body.l_username + " " + req.body.l_password)
         db.loginUser(req.body.l_username, req.body.l_password)
             .then(result => {
-                cache.addOnlineUser(req.body.l_username);
+                cache.addOnlineUser(result.user);
                 res.send(result)
             })
             .catch(err => {
@@ -51,13 +51,16 @@ module.exports = function(app) {
     })
 
     app.post('/subForChannel', (req, res) => {
-        if (!cache.checkIfOnline(req.body.s_username)) {
+        console.log("Join request: " + req.body.j_username + req.body.j_name);
+        console.log(cache.cache.online_users);
+        if (!cache.checkIfOnline(req.body.j_username)) {
             res.send({
                 success: false,
                 msg: "Must be logged in first"
             })
+            return;
         }
-        db.subForChannel(req.body.s_username, req.body.s_channel, req.body.s_password)
+        db.subForChannel(req.body.j_username, req.body.j_name, req.body.j_password)
             .then(result => {
                 res.send(result);
             })
